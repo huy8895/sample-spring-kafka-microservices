@@ -1,5 +1,6 @@
 package pl.piomin.order.service;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ public class OrderGeneratorService {
     private Executor executor;
     private KafkaTemplate<Long, Order> template;
 
-    public OrderGeneratorService(Executor executor, KafkaTemplate<Long, Order> template) {
+    public OrderGeneratorService(@Qualifier("taskExecutor") Executor executor, KafkaTemplate<Long, Order> template) {
         this.executor = executor;
         this.template = template;
     }
@@ -26,7 +27,7 @@ public class OrderGeneratorService {
     public void generate() {
         for (int i = 0; i < 10000; i++) {
             int x = RAND.nextInt(5) + 1;
-            Order o = new Order(id.incrementAndGet(), RAND.nextLong(100) + 1, RAND.nextLong(100) + 1, "NEW");
+            Order o = new Order(id.incrementAndGet(), RAND.nextLong() + 1, RAND.nextLong() + 1, "NEW");
             o.setPrice(100 * x);
             o.setProductCount(x);
             template.send("orders", o.getId(), o);
